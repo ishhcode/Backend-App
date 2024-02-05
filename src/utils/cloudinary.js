@@ -20,6 +20,7 @@ cloudinary.config({
         )
         //file has been uploaded successfully
         console.log("file is uploaded successfully!",(await response).url);
+        fs.unlinkSync(localFilePath)
         return response;
     } catch (error) {
         fs.unlinkSync(localFilePath)
