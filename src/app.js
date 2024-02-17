@@ -3,6 +3,7 @@ import cors from "cors"
 import cookieParser from "cookie-parser"
 const app = express();
 
+
 app.use(cors({
     origin: process.env.CORS_ORIGIN,
     credentials: true
@@ -16,9 +17,19 @@ app.use(cookieParser())
 
 //routes import
 import userRoutes from "./routes/user.routes.js";
+import videoRouter from "./routes/video.routes.js"
 
 //routes declaration
-app.use("/api/users",userRoutes);
+//routes declaration
+
+app.use("/api/users", userRoutes)
+
+app.use("/api/videos", videoRouter)
+// app.use("/api/comments", commentRouter)
+// app.use("/api/likes", likeRouter)
+// app.use("/api/playlist", playlistRouter)
+// app.use("/api/dashboard", dashboardRouter)
+
 
 //    http://localhost:8000/api/users/register
 
