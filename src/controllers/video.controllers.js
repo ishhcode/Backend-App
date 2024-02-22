@@ -19,6 +19,38 @@ const checkOwner = async(videoId,id)=>{
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query
     //TODO: get all videos based on query, sort, pagination
+    const sortOptions  = {}
+    if (sortBy) {
+        sortOptions[sortBy] = sortType == "desc" ? -1 : 1;
+    }
+    const videos = await Video.aggregate([
+        {
+            $match: {
+                $or: [
+                  { title: { $regex: query, $options: "i" } },
+                  { description: { $regex: query, $options: "i" } },
+                ],
+                owner: userId,
+            },
+
+        },
+        {
+            $sort: sortOptions,
+        },
+        {
+            $skip: (page - 1) * limit
+        },
+        {
+            $limit: parseInt(limit)
+        }
+    ])
+    if(!videos){
+        throw new ApiError(500,"No Video Found!")
+    }
+    return res.status(200)
+    .json(
+        new ApiResponse(200,videos,"All videos Fetched successfully!")
+    )
 })
 
 const publishAVideo = asyncHandler(async (req, res) => {
@@ -93,6 +125,10 @@ const updateVideo = asyncHandler(async (req, res) => {
     if(!checkOwner(videoId,req.user?._id)) {
         throw new ApiError(404, "Unauthorized Access")
     }
+    const prevVideo = await Video.findById(videoId)
+    if(!prevVideo){
+        throw new ApiError(404, "video not found")
+    }
     const {title,description} = req.body
     if(!title || !description){
         throw new ApiError(400,"title and description are required!")
@@ -103,6 +139,7 @@ const updateVideo = asyncHandler(async (req, res) => {
         console.log('No file uploaded');
         return new ApiResponse(500,"No thumbnail uploaded");
     }
+    const previousThumbnail = prevVideo.thumbnail?.public_id;
 
     const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
@@ -124,6 +161,7 @@ const updateVideo = asyncHandler(async (req, res) => {
     if(!video){
         throw new ApiError(500,"Something went wrong while updating the details")
     }
+    await deleteOnCloudinary(previousThumbnail);
 
     return res.status(200)
     .json(
@@ -150,7 +188,17 @@ const deleteVideo = asyncHandler(async (req, res) => {
     if(!video){
         throw new ApiError(404, "Video not found")
     }
-    await Video.findByIdAndDelete(video)
+    if(video.videoFile){
+        await deleteOnCloudinary(video.videoFile.public_id, "video")
+    }
+
+    if(video.thumbnail){
+        await deleteOnCloudinary(video.thumbnail.public_id)
+    }
+    const deletedVideo= await Video.findByIdAndDelete(video)
+    if(!deletedVideo){
+        throw new ApiError(400, "Something error happened while deleting the video")
+    }
     return res.status(200)
     .json(
         new ApiResponse(200,{},"video deleted Successfully!")

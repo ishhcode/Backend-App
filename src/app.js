@@ -23,6 +23,7 @@ import subscriptionRouter from "./routes/subscription.routes.js"
 import playlistRouter from "./routes/playlist.routes.js"
 import likeRouter from "./routes/like.routes.js"
 import dashboardRouter from "./routes/dashboard.routes.js"
+import commentRouter from "./routes/comment.routes.js"
 
 //routes declaration
 //routes declaration
@@ -32,7 +33,7 @@ app.use("/api/users", userRoutes)
 app.use("/api/videos", videoRouter)
 app.use("/api/tweets", tweetRouter)
 app.use("/api/subscriptions", subscriptionRouter)
-// app.use("/api/comments", commentRouter)
+app.use("/api/comments", commentRouter)
 app.use("/api/likes", likeRouter)
  app.use("/api/playlist", playlistRouter)
  app.use("/api/dashboard", dashboardRouter)
