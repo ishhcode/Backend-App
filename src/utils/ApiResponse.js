@@ -1,7 +1,7 @@
 // Define a class named ApiResponse
 class ApiResponse {
     // Constructor function for creating instances of the class
-    constructor(statusCode, message = "success", data) {
+    constructor(statusCode,data, message = "success") {
         // Instance variables to store the properties of the API response
         this.statusCode = statusCode;   // HTTP status code of the response
         this.data = data;               // Data payload of the response

@@ -16,20 +16,24 @@ const checkOwner = async (tweetId, id) => {
 
 const createTweet = asyncHandler(async (req, res) => {
     //TODO: create tweet
-    const { content } = req.body
+    const { content } = req.body;
+
     if (!content) {
-        throw new ApiError(404, "content is required!")
-    }
-    const tweet = await Tweet.create({
-        content: content,
-        owner: req.user?._id
-    })
-    if (!tweet) {
-        throw new ApiError(500, "server not able to create tweet!")
+        throw new ApiError(400, "content is required");
     }
 
-    return res.status(200)
-        .json(new ApiResponse(200, tweet, "tweet created successfully!"))
+    const tweet = await Tweet.create({
+        content,
+        owner: req.user?._id,
+    });
+
+    if (!tweet) {
+        throw new ApiError(500, "failed to create tweet please try again");
+    }
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, tweet, "Tweet created successfully"));
 })
 
 const getUserTweets = asyncHandler(async (req, res) => {
@@ -74,11 +78,6 @@ const getUserTweets = asyncHandler(async (req, res) => {
             }
         }
     ])
-
-
-    if(!tweet.length){
-        throw new  ApiError(404, 'No tweets found for this user');
-    }
     return res.status(200)
         .json(
             new ApiResponse(200, tweet, "all tweets retrieved!")

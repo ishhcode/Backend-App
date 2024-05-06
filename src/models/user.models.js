@@ -5,7 +5,7 @@ import jwt from "jsonwebtoken";
 const userSchema = mongoose.Schema({
     username: {
         type:String,
-        required: true,
+        required: [true, 'username is required'],
         unique: true,
         lowercase: true,
         trim:true,
@@ -13,14 +13,14 @@ const userSchema = mongoose.Schema({
     },
     email: {
         type:String,
-        required: true,
+        required: [true, 'email is required'],
         unique: true,
         lowercase: true,
         trim:true,
     },
     fullName: {
         type:String,
-        required: true,
+        required: [true, 'fullname is required'],
         trim:true,
         index: true,  //for searching in database
     },
@@ -31,11 +31,17 @@ const userSchema = mongoose.Schema({
         }
     ],
     avatar:{
-        type:String, //cloudinary url
+        type: {
+            public_id: String,
+            url: String //cloudinary url
+        },
         required:true,
     },
     coverImage:{
-        type:String, //cloudinary url
+        type: {
+            public_id: String,
+            url: String //cloudinary url
+        },
     },
     password: {
         type: String,
@@ -51,7 +57,7 @@ const userSchema = mongoose.Schema({
 userSchema.pre("save", async function (next) {
     if(!this.isModified("password")) next();
     this.password = await bcrypt.hash(this.password, 10)
-    next()
+    return next()
 })
 
 userSchema.methods.isPasswordCorrect = async function (password){

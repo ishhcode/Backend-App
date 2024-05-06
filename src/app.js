@@ -1,6 +1,7 @@
 import express from "express";
 import cors from "cors"
 import cookieParser from "cookie-parser"
+import morgan from "morgan";
 const app = express();
 
 
@@ -14,6 +15,7 @@ app.use(express.json({ limit: "16kb"}))
 app.use(express.urlencoded({extended: true, limit: "16kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
+app.use(morgan("dev"));
 
 //routes import
 import userRoutes from "./routes/user.routes.js";
@@ -30,10 +32,10 @@ import commentRouter from "./routes/comment.routes.js"
 
 app.use("/api/users", userRoutes)
 
-app.use("/api/videos", videoRouter)
-app.use("/api/tweets", tweetRouter)
+app.use("/api/video", videoRouter)
+app.use("/api/tweet", tweetRouter)
 app.use("/api/subscriptions", subscriptionRouter)
-app.use("/api/comments", commentRouter)
+app.use("/api/comment", commentRouter)
 app.use("/api/likes", likeRouter)
  app.use("/api/playlist", playlistRouter)
  app.use("/api/dashboard", dashboardRouter)
