@@ -30,15 +30,15 @@ import commentRouter from "./routes/comment.routes.js"
 //routes declaration
 //routes declaration
 
-app.use("/api/users", userRoutes)
+app.use("/users", userRoutes)
 
-app.use("/api/video", videoRouter)
-app.use("/api/tweet", tweetRouter)
-app.use("/api/subscriptions", subscriptionRouter)
-app.use("/api/comment", commentRouter)
-app.use("/api/likes", likeRouter)
- app.use("/api/playlist", playlistRouter)
- app.use("/api/dashboard", dashboardRouter)
+app.use("/video", videoRouter)
+app.use("/tweet", tweetRouter)
+app.use("/subscriptions", subscriptionRouter)
+app.use("/comment", commentRouter)
+app.use("/likes", likeRouter)
+ app.use("/playlist", playlistRouter)
+ app.use("/dashboard", dashboardRouter)
 
 
 //    http://localhost:8000/api/users/register
