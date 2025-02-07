@@ -1,10 +1,10 @@
-import { asyncHandler } from "../utils/asyncHandler.js";
-import { ApiError } from "../utils/ApiError.js";
-import { User } from "../models/user.models.js";
-import {Video} from "../models/video.models.js";
-import { uploadOnCloudinary } from "../utils/cloudinary.js";
-import { ApiResponse } from "../utils/ApiResponse.js";
-import mongoose, { isValidObjectId } from "mongoose";
+import mongoose, {isValidObjectId} from "mongoose"
+import {Video} from "./../models/video.models.js"
+import {User} from "./../models/user.models.js"
+import {ApiError} from "./../utils/ApiError.js"
+import {ApiResponse} from "./../utils/ApiResponse.js"
+import {asyncHandler} from "./../utils/asyncHandler.js"
+import {uploadOnCloudinary, deleteOnCloudinary} from "./../utils/cloudinary.js"
 
 const checkOwner = async(videoId,id)=>{
     const video = await Video.findById(videoId);
@@ -14,12 +14,10 @@ const checkOwner = async(videoId,id)=>{
     }
     return true;
 
-
 }
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const { page = 1, limit = 10, query, sortBy, sortType, userId } = req.query;
-    console.log(userId);
     const pipeline = [];
 
     // for using Full Text based search u need to create a search index in mongoDB atlas
@@ -33,7 +31,7 @@ const getAllVideos = asyncHandler(async (req, res) => {
                 index: "search-videos",
                 text: {
                     query: query,
-                    path: ["title", "description"] //search only on title, desc
+                    path: ["title", "description"]
                 }
             }
         });
@@ -96,32 +94,19 @@ const getAllVideos = asyncHandler(async (req, res) => {
     };
 
     const video = await Video.aggregatePaginate(videoAggregate, options);
+    
 
     return res
         .status(200)
         .json(new ApiResponse(200, video, "Videos fetched successfully"));
-})
+});
 
 const publishAVideo = asyncHandler(async (req, res) => {
-    const { title, description } = req.body;
+    const { title, description,videoFile, thumbnail } = req.body;
     
     if ([title, description].some((field) => field?.trim() === "")) {
         throw new ApiError(400, "All fields are required");
     }
-
-    const videoFileLocalPath = req.files?.videoFile[0].path;
-    const thumbnailLocalPath = req.files?.thumbnail[0].path;
-
-    if (!videoFileLocalPath) {
-        throw new ApiError(400, "videoFileLocalPath is required");
-    }
-
-    if (!thumbnailLocalPath) {
-        throw new ApiError(400, "thumbnailLocalPath is required");
-    }
-
-    const videoFile = await uploadOnCloudinary(videoFileLocalPath);
-    const thumbnail = await uploadOnCloudinary(thumbnailLocalPath);
 
     if (!videoFile) {
         throw new ApiError(400, "Video file not found");
@@ -158,9 +143,8 @@ const publishAVideo = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, video, "Video uploaded successfully"));
 });
 
+// get video by id
 const getVideoById = asyncHandler(async (req, res) => {
-    
-    // //TODO: get video by id
     const { videoId } = req.params;
     // let userId = req.body;
     
@@ -279,7 +263,7 @@ const getVideoById = asyncHandler(async (req, res) => {
     // add this video to user watch history
     await User.findByIdAndUpdate(req.user?._id, {
         $addToSet: {
-            watchHistory: videoId
+            WatchHistory: videoId
         }
     });
 
@@ -288,8 +272,9 @@ const getVideoById = asyncHandler(async (req, res) => {
         .json(
             new ApiResponse(200, video[0], "video details fetched successfully")
         );
-})
+});
 
+// update video details like title, description, thumbnail
 const updateVideo = asyncHandler(async (req, res) => {
     const { title, description } = req.body;
     const { videoId } = req.params;
@@ -356,11 +341,9 @@ const updateVideo = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, updatedVideo, "Video updated successfully"));
+});
 
-
-
-})
-
+// delete video
 const deleteVideo = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
 
@@ -403,8 +386,9 @@ const deleteVideo = asyncHandler(async (req, res) => {
     return res
         .status(200)
         .json(new ApiResponse(200, {}, "Video deleted successfully"));
-})
+});
 
+// toggle publish status of a video
 const togglePublishStatus = asyncHandler(async (req, res) => {
     const { videoId } = req.params;
 
@@ -448,7 +432,8 @@ const togglePublishStatus = asyncHandler(async (req, res) => {
                 "Video publish toggled successfully"
             )
         );
-})
+});
+
 
 export {
     getAllVideos,
